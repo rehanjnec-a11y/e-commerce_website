@@ -16,6 +16,10 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     die("Access denied. Admins only.");
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Validate order ID
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
     die("Invalid Order ID.");
@@ -154,6 +158,28 @@ $items = mysqli_stmt_get_result($stmt);
             ₹<?php echo number_format($order['total_amount'], 2); ?>
         </p>
     </div>
+
+    <h2>Update Order Status</h2>
+
+<form action="update_order_status.php" method="POST">
+
+    <input type="hidden" name="order_id"
+           value="<?php echo (int)$order['id']; ?>">
+
+    <input type="hidden" name="csrf_token"
+           value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+    <select name="status" required>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+    </select>
+
+    <button type="submit">Update Status</button>
+
+</form>
 
     <h2>Products Ordered</h2>
     
