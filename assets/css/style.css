@@ -51,6 +51,85 @@ body {
     object-fit: contain;
 }
 
+/* Product Search and Filters */
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0 30px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+.filter-form input,
+.filter-form select {
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    flex: 1;
+    min-width: 130px;
+}
+
+.filter-form button {
+    padding: 11px 18px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.filter-form button:hover {
+    background: #444;
+}
+
+.filter-form a {
+    display: flex;
+    align-items: center;
+    color: #dc3545;
+    text-decoration: none;
+    padding: 8px;
+}
+
+.filter-form a:hover {
+    text-decoration: underline;
+}
+
+/* Product Pagination */
+
+.product-count {
+    margin: 25px 0 15px;
+    color: #555;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.pagination a {
+    padding: 10px 15px;
+    background: white;
+    color: #222;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.pagination a:hover,
+.pagination a.active {
+    background: #222;
+    color: white;
+    border-color: #222;
+}
+
+
 
 
 

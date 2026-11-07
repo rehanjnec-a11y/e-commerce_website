@@ -98,6 +98,19 @@ if (!$result) {
             text-decoration: none;
         }
 
+        button.delete-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #dc3545;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button.delete-btn:hover {
+    text-decoration: underline;
+}
+
         @media (max-width: 700px) {
             .table-container {
                 overflow-x: auto;
@@ -156,13 +169,28 @@ if (!$result) {
                             Edit
                         </a>
 
-                        <a
-                            href="delete_category.php?id=<?php echo (int)$category['id']; ?>"
-                            class="delete-btn"
-                            onclick="return confirm('Are you sure you want to delete this category?');"
-                        >
-                            Delete
-                        </a>
+                        <form
+    method="POST"
+    action="delete_category.php"
+    style="display:inline;"
+    onsubmit="return confirm('Are you sure you want to delete this category?');"
+>
+    <input
+        type="hidden"
+        name="id"
+        value="<?php echo (int)$category['id']; ?>"
+    >
+
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>"
+    >
+
+    <button type="submit" class="delete-btn">
+        Delete
+    </button>
+</form>
                     </td>
                 </tr>
 
