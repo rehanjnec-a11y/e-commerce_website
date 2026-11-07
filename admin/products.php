@@ -1,11 +1,10 @@
-
 <?php
 
 session_start();
 
 require_once "../config/database.php";
 
-// Check if user is logged in
+// Check login
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit;
@@ -16,7 +15,11 @@ if ($_SESSION['user_role'] !== 'admin') {
     die("Access denied. Admins only.");
 }
 
-// Fetch all products
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Fetch products from database
 $sql = "SELECT products.*, categories.name AS category_name
         FROM products
         INNER JOIN categories
@@ -25,11 +28,13 @@ $sql = "SELECT products.*, categories.name AS category_name
 
 $result = mysqli_query($conn, $sql);
 
+// Check query
 if (!$result) {
     die("Query failed: " . mysqli_error($conn));
 }
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -39,92 +44,149 @@ if (!$result) {
     <title>Manage Products - Global Mart</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 25px;
-            background: #f4f4f4;
-        }
+        
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 25px;
+    background: #f4f4f4;
+}
 
-        h1 {
-            margin-bottom: 25px;
-        }
+h1 {
+    margin-bottom: 20px;
+    color: #222;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    table-layout: fixed;
+}
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
+th, td {
+    padding: 14px;
+    border: 1px solid #ddd;
+    text-align: left;
+    vertical-align: middle;
+    overflow-wrap: break-word;
+}
 
-        th {
-            background: #222;
-            color: white;
-        }
+th {
+    background: #222;
+    color: white;
+}
 
-        img {
-            width: 65px;
-            height: 65px;
-            object-fit: contain;
-        }
+th:nth-child(1) { width: 6%; }
+th:nth-child(2) { width: 13%; }
+th:nth-child(3) { width: 25%; }
+th:nth-child(4) { width: 17%; }
+th:nth-child(5) { width: 13%; }
+th:nth-child(6) { width: 10%; }
+th:nth-child(7) { width: 16%; }
 
-        a {
-            color: blue;
-        }
+table img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+    display: block;
+}
+
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button {
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
     </style>
 </head>
-
 <body>
-
     <h1>Manage Products</h1>
 
-    <p>
-        <a href="index.php">Back to Dashboard</a>
-    </p>
-
+<p>
+    <a href="index.php">Back to Dashboard</a> |
+    <a href="add_product.php">Add New Product</a>
+</p>
     <table>
 
+    <tr>
+        <th>ID</th>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Actions</th>
+    </tr>
+
+    <?php while ($product = mysqli_fetch_assoc($result)) { ?>
+
         <tr>
-            <th>ID</th>
-            <th>Image</th>
-            <th>Product Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock</th>
-        </tr>
 
-        <?php while ($product = mysqli_fetch_assoc($result)) { ?>
+            <td><?php echo $product['id']; ?></td>
 
-            <tr>
+            <td>
+                <?php if (!empty($product['image'])) { ?>
+                    <img src="../uploads/products/<?php echo htmlspecialchars($product['image']); ?>"
+                         alt="Product Image">
+                <?php } else { ?>
+                    No Image
+                <?php } ?>
+            </td>
 
-                <td><?php echo $product['id']; ?></td>
+            <td><?php echo htmlspecialchars($product['name']); ?></td>
 
-                <td>
-                    <?php if (!empty($product['image'])) { ?>
-                        <img src="../uploads/products/<?php echo htmlspecialchars($product['image']); ?>">
-                    <?php } else { ?>
-                        No Image
-                    <?php } ?>
-                </td>
+            <td><?php echo htmlspecialchars($product['category_name']); ?></td>
 
-                <td><?php echo htmlspecialchars($product['name']); ?></td>
+            <td>₹<?php echo number_format($product['price'], 2); ?></td>
 
-                <td><?php echo htmlspecialchars($product['category_name']); ?></td>
+            <td><?php echo (int)$product['stock']; ?></td>
 
-                <td>₹<?php echo number_format($product['price'], 2); ?></td>
+            <td>
+    <a href="edit_product.php?id=<?php echo (int)$product['id']; ?>">
+        Edit
+    </a>
 
-                <td><?php echo $product['stock']; ?></td>
+    <form action="delete_product.php" method="POST"
+          style="display:inline;"
+          onsubmit="return confirm('Are you sure you want to delete this product?');">
 
-            </tr>
+        <input type="hidden" name="id"
+               value="<?php echo (int)$product['id']; ?>">
 
-        <?php } ?>
+        <input type="hidden" name="csrf_token"
+               value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 
-    </table>
+        <button type="submit"
+                style="background:#dc3545; color:white; border:none;
+                       padding:8px 12px; cursor:pointer;">
+            Delete
+        </button>
+
+    </form>
+</td>
+
+
+</tr>
+
+<?php } ?>
+
+   
+</table>
+    
+
 
 </body>
 </html>
