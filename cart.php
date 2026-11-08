@@ -2,6 +2,10 @@
 
 session_start();
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require_once "config/database.php";
 
 
@@ -66,7 +70,7 @@ require_once "includes/header.php";
         <div class="cart-item">
 
             <img
-                src="uploads/products/<?php echo $item['image']; ?>"
+                src="uploads/products/<?php echo htmlspecialchars($item['image']); ?>"
                 alt="<?php echo htmlspecialchars($item['name']); ?>"
                 width="150"
             >
@@ -115,9 +119,26 @@ require_once "includes/header.php";
 
 </p>
 
-<a href="remove_from_cart.php?id=<?php echo $item['id']; ?>">
-    Remove
-</a>
+
+<form method="POST" action="remove_from_cart.php"
+      onsubmit="return confirm('Remove this product from your cart?');">
+
+    <input
+        type="hidden"
+        name="id"
+        value="<?php echo (int)$item['id']; ?>"
+    >
+
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>"
+    >
+
+    <button type="submit">Remove</button>
+
+</form>
+
 
             <p>
                 Subtotal: ₹<?php echo number_format($subtotal, 2); ?>
