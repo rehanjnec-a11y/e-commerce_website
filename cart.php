@@ -82,15 +82,37 @@ require_once "includes/header.php";
             <p>
     Quantity:
 
-    <a href="update_cart.php?id=<?php echo $item['id']; ?>&action=decrease">
-        −
-    </a>
+    
+<!-- Increase Quantity -->
+<form method="POST" action="update_cart.php" style="display:inline;">
 
-    <?php echo $item['quantity']; ?>
+    <input type="hidden" name="id"
+           value="<?php echo (int)$item['id']; ?>">
 
-    <a href="update_cart.php?id=<?php echo $item['id']; ?>&action=increase">
-        +
-    </a>
+    <input type="hidden" name="action" value="increase">
+
+    <input type="hidden" name="csrf_token"
+           value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+    <button type="submit">+</button>
+
+</form>
+
+<!-- Decrease Quantity -->
+<form method="POST" action="update_cart.php" style="display:inline;">
+
+    <input type="hidden" name="id"
+           value="<?php echo (int)$item['id']; ?>">
+
+    <input type="hidden" name="action" value="decrease">
+
+    <input type="hidden" name="csrf_token"
+           value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+    <button type="submit">-</button>
+
+</form>
+
 </p>
 
 <a href="remove_from_cart.php?id=<?php echo $item['id']; ?>">
